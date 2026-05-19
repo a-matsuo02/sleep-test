@@ -104,7 +104,19 @@ if page == "① 基本情報入力":
     student_id = st.text_input("氏名または学籍番号", value=current_id)
     
     current_sleep = st.session_state.get('sleep_hours', 6.0)
-    sleep_hours = st.number_input("昨晩の睡眠時間（時間）", min_value=0.0, max_value=24.0, value=current_sleep, step=0.5)
+    current_h = int(current_sleep)
+    current_m = int(round((current_sleep - current_h) * 60))
+    if current_m not in [0, 10, 20, 30, 40, 50]:
+        current_m = 0
+
+    st.write("昨晩の睡眠時間")
+    col1, col2 = st.columns(2)
+    with col1:
+        h = st.number_input("時間", min_value=0, max_value=24, value=current_h, step=1)
+    with col2:
+        m = st.selectbox("分", options=[0, 10, 20, 30, 40, 50], index=[0, 10, 20, 30, 40, 50].index(current_m))
+    
+    sleep_hours = h + (m / 60.0)
     
     if st.button("保存して進む", type="primary"):
         if student_id.strip() == "":
@@ -353,10 +365,11 @@ elif page == "④ 画像記憶テスト":
     elif state == 'practice_memorize':
         st.info("【練習】10秒間、以下の配置を記憶してください！")
         grid = st.session_state.img_grid
-        for r in range(3):
-            cols = st.columns(3)
-            for c in range(3):
-                cols[c].markdown(f"<h1 style='text-align: center;'>{grid[r*3+c]}</h1>", unsafe_allow_html=True)
+        grid_html = "<div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; max-width: 300px; margin: 0 auto;'>"
+        for item in grid:
+            grid_html += f"<div style='font-size: 3rem; background-color: rgba(128,128,128,0.1); padding: 10px; border-radius: 10px;'>{item}</div>"
+        grid_html += "</div><br>"
+        st.markdown(grid_html, unsafe_allow_html=True)
         
         if time.time() - st.session_state.img_start > 10.0:
             st.session_state.img_state = 'practice_question'
@@ -409,10 +422,11 @@ elif page == "④ 画像記憶テスト":
     elif state == 'test_memorize':
         st.info("【本番】20秒間、以下の配置を記憶してください！")
         grid = st.session_state.img_grid
-        for r in range(3):
-            cols = st.columns(3)
-            for c in range(3):
-                cols[c].markdown(f"<h1 style='text-align: center;'>{grid[r*3+c]}</h1>", unsafe_allow_html=True)
+        grid_html = "<div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; max-width: 300px; margin: 0 auto;'>"
+        for item in grid:
+            grid_html += f"<div style='font-size: 3rem; background-color: rgba(128,128,128,0.1); padding: 10px; border-radius: 10px;'>{item}</div>"
+        grid_html += "</div><br>"
+        st.markdown(grid_html, unsafe_allow_html=True)
         
         if time.time() - st.session_state.img_start > 20.0:
             st.session_state.img_state = 'test_question'
